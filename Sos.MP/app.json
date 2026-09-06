@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Minhas Notas",
+    "slug": "SosMP",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFF6D9"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.seuusuario.sosmp"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFF6D9"
+      },
+      "package": "com.seuusuario.sosmp"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-asset"
+    ]
+  }
+}
