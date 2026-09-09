@@ -5,88 +5,85 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 
 export default function App() {
-  const [nota, setNota] = useState('');
-  const [listaDeNotas, setListaDeNotas] = useState<string[]>([]);
-  const [idioma, setIdioma] = useState<'pt' | 'en'>('pt');
+  const [note, setNote] = useState('');
+  const [notes, setNotes] = useState<string[]>([]);
+  const [language, setLanguage] = useState<'pt' | 'en'>('pt');
   const router = useRouter();
 
   const [fontsLoaded] = useFonts({
     'Merosa': require('../../assets/fonts/Merosa.otf'),
   });
 
-  // Carrega o idioma salvo anteriormente ao abrir o app
   useEffect(() => {
-    const carregarIdiomaSalvo = async () => {
-      const idiomaSalvo = await AsyncStorage.getItem('idiomaApp');
-      if (idiomaSalvo === 'pt' || idiomaSalvo === 'en') {
-        setIdioma(idiomaSalvo);
+    const loadSavedLanguage = async () => {
+      const savedLanguage = await AsyncStorage.getItem('appLanguage');
+      if (savedLanguage === 'pt' || savedLanguage === 'en') {
+        setLanguage(savedLanguage);
       }
     };
-    carregarIdiomaSalvo();
+    loadSavedLanguage();
   }, []);
 
   if (!fontsLoaded) {
     return null;
   }
 
-  // Função para alternar e salvar o idioma
-  const alternarIdioma = async () => {
-    const novoIdioma = idioma === 'pt' ? 'en' : 'pt';
-    setIdioma(novoIdioma);
-    await AsyncStorage.setItem('idiomaApp', novoIdioma);
+  const toggleLanguage = async () => {
+    const newLanguage = language === 'pt' ? 'en' : 'pt';
+    setLanguage(newLanguage);
+    await AsyncStorage.setItem('appLanguage', newLanguage);
   };
 
-  const salvarNota = async () => {
-    const senhaSalva = await AsyncStorage.getItem('senhaSecreta') || '9999';
+  const saveNote = async () => {
+    const savedPassword = await AsyncStorage.getItem('secretPassword') || '9999';
 
-    if (nota.trim() === senhaSalva) {
-      Vibration.vibrate(100); 
-      setNota(''); 
-      router.push('/explore'); 
-      return; 
+    if (note.trim() === savedPassword) {
+      Vibration.vibrate(100);
+      setNote('');
+      router.push('/explore');
+      return;
     }
 
-    if (nota.trim() !== '') {
-      setListaDeNotas([...listaDeNotas, nota]);
-      setNota(''); 
+    if (note.trim() !== '') {
+      setNotes([...notes, note]);
+      setNote('');
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Cabeçalho com o Título e o Botão de Idioma */}
       <View style={styles.header}>
-        <Text style={styles.titulo}>
-          {idioma === 'pt' ? 'Minhas Anotações' : 'My Notes'}
+        <Text style={styles.title}>
+          {language === 'pt' ? 'Minhas Anotações' : 'My Notes'}
         </Text>
         
-        <TouchableOpacity style={styles.botaoIdioma} onPress={alternarIdioma}>
-          <Text style={styles.textoBotaoIdioma}>
-            {idioma === 'pt' ? '🇬🇧 EN' : '🇧🇷 PT'}
+        <TouchableOpacity style={styles.languageButton} onPress={toggleLanguage}>
+          <Text style={styles.languageButtonText}>
+            {language === 'pt' ? '🇬🇧 EN' : '🇧🇷 PT'}
           </Text>
         </TouchableOpacity>
       </View>
       
       <TextInput
         style={styles.input}
-        placeholder={idioma === 'pt' ? "Escreva uma nova nota..." : "Write a new note..."}
+        placeholder={language === 'pt' ? "Escreva uma nova nota..." : "Write a new note..."}
         placeholderTextColor="#A88B7D"
-        value={nota}
-        onChangeText={setNota}
+        value={note}
+        onChangeText={setNote}
       />
       
-      <TouchableOpacity style={styles.botao} onPress={salvarNota}>
-        <Text style={styles.textoBotao}>
-          {idioma === 'pt' ? 'Salvar' : 'Save'}
+      <TouchableOpacity style={styles.button} onPress={saveNote}>
+        <Text style={styles.buttonText}>
+          {language === 'pt' ? 'Salvar' : 'Save'}
         </Text>
       </TouchableOpacity>
 
       <FlatList
-        data={listaDeNotas}
+        data={notes}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={styles.itemNota}>
-            <Text style={styles.textoNota}>{item}</Text>
+          <View style={styles.noteItem}>
+            <Text style={styles.noteText}>{item}</Text>
           </View>
         )}
       />
@@ -95,20 +92,30 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFF6D9', paddingTop: 60, paddingHorizontal: 20 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  titulo: { 
+  container: { 
+    flex: 1, 
+    backgroundColor: '#FFF6D9', 
+    paddingTop: 60, 
+    paddingHorizontal: 20 
+  },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 20 
+  },
+  title: { 
     fontSize: 28, 
     fontFamily: 'Merosa', 
     color: '#4F2C1D' 
   },
-  botaoIdioma: { 
+  languageButton: { 
     backgroundColor: '#4F2C1D', 
     paddingVertical: 6, 
     paddingHorizontal: 12, 
     borderRadius: 20 
   },
-  textoBotaoIdioma: { 
+  languageButtonText: { 
     color: '#FFF6D9', 
     fontWeight: 'bold', 
     fontSize: 14 
@@ -124,9 +131,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Merosa',
     fontSize: 20
   },
-  botao: { backgroundColor: '#4F2C1D', padding: 15, borderRadius: 8, alignItems: 'center', marginBottom: 20 },
-  textoBotao: { color: '#FFF6D9', fontWeight: 'bold', fontSize: 18, fontFamily: 'Merosa' },
-  itemNota: { 
+  button: { 
+    backgroundColor: '#4F2C1D', 
+    padding: 15, 
+    borderRadius: 8, 
+    alignItems: 'center', 
+    marginBottom: 20 
+  },
+  buttonText: { 
+    color: '#FFF6D9', 
+    fontWeight: 'bold', 
+    fontSize: 18, 
+    fontFamily: 'Merosa' 
+  },
+  noteItem: { 
     backgroundColor: '#FFFFFF', 
     padding: 15, 
     borderRadius: 8, 
@@ -134,7 +152,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 5, 
     borderLeftColor: '#4F2C1D' 
   },
-  textoNota: { 
+  noteText: { 
     color: '#4F2C1D', 
     fontSize: 22, 
     fontFamily: 'Merosa' 
